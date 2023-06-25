@@ -110,6 +110,10 @@ in
     gh
     steam
     spotify
+    git
+    inkscape
+    temurin-jre-bin-17
+    blockbench-electron
   ];
 
   programs.steam = {
