@@ -11,6 +11,7 @@ in
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      <home-manager/nixos>
     ];
 
   # Bootloader.
@@ -92,6 +93,12 @@ in
     ];
   };
 
+  home-manager = {
+    useGlobalPkgs = true;
+    useUserPackages = true;
+    users.beto = import ./home.nix;
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
@@ -108,12 +115,11 @@ in
     jetbrains-toolbox
     fish
     gh
-    steam
     spotify
-    git
     inkscape
     temurin-jre-bin-17
     blockbench-electron
+    steam
   ];
 
   programs.steam = {
@@ -122,12 +128,17 @@ in
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
   };
 
+
+
   services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
-  
 
   fonts.fonts = with pkgs; [
     (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
   ];
+  
+  programs.fish.enable = true;
+  users.defaultUserShell = pkgs.fish;
+  environment.shells = with pkgs; [ fish ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
