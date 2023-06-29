@@ -19,7 +19,7 @@
   # environment.
 
   nixpkgs.config.allowUnfree = true;
-  
+
   home.packages = [
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
@@ -42,6 +42,9 @@
     pkgs.jetbrains-toolbox
     pkgs.fish
     pkgs.gh
+    pkgs.nodejs_20
+    pkgs.yarn
+    pkgs.neovim
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
