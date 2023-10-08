@@ -4,15 +4,14 @@
 
 { config, pkgs, ... }:
 
-let
-  unstable = import <unstable> { config = { allowUnfree = true; }; };
-in
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      <home-manager/nixos>
     ];
+
+  # Enable Flakes and the new command-line tool
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -49,9 +48,9 @@ in
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  # Enable the KDE Plasma Desktop Environment.
+  services.xserver.displayManager.sddm.enable = true;
+  services.xserver.desktopManager.plasma5.enable = true;
 
   # Configure keymap in X11
   services.xserver = {
@@ -88,57 +87,31 @@ in
     description = "Beto";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
-      firefox
+      kate
     #  thunderbird
     ];
   };
 
-  home-manager = {
-    useGlobalPkgs = true;
-    useUserPackages = true;
-    users.beto = import ./home.nix;
-  };
-
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
-
+  
+  services.flatpak.enable = true;
+  
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    wget
-    discord
-    prismlauncher
-    unstable.vscode
-    gnomeExtensions.appindicator
-    gnome.gnome-tweaks
-    jetbrains-toolbox
-    fish
-    gh
+  #  wget
+    aseprite
     spotify
-    inkscape
-    temurin-jre-bin-17
-    blockbench-electron
-    steam
+    brave
+    prismlauncher
+    vscode
+    filezilla
+    rclone
+    google-chrome
+    jdk17
   ];
-
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  };
-
-
-
-  services.udev.packages = with pkgs; [ gnome.gnome-settings-daemon ];
-
-  fonts.fonts = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" "JetBrainsMono" ]; })
-  ];
-  
-  programs.fish.enable = true;
-  users.defaultUserShell = pkgs.fish;
-  environment.shells = with pkgs; [ fish ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
