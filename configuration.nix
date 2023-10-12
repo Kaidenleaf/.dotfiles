@@ -3,7 +3,6 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -32,7 +31,7 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
-
+  
   # Set your time zone.
   time.timeZone = "America/Costa_Rica";
 
@@ -53,6 +52,7 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+  services.xserver.videoDrivers = [ "amdgpu" ];
 
   # Enable the KDE Plasma Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
@@ -60,8 +60,9 @@
 
   # Configure keymap in X11
   services.xserver = {
-    layout = "us";
+    layout = "us,es";
     xkbVariant = "";
+    xkbOptions = "grp:alt_shift_toggle";
   };
 
   # Enable CUPS to print documents.
@@ -94,7 +95,6 @@
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
       kate
-    #  thunderbird
     ];
   };
 
@@ -102,12 +102,13 @@
   nixpkgs.config.allowUnfree = true;
   
   services.flatpak.enable = true;
-  
+    
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
+    lutris
     aseprite
     spotify
     brave
@@ -117,6 +118,14 @@
     rclone
     google-chrome
     jdk17
+    wofi
+    xdg-desktop-portal-hyprland
+    dunst
+    libnotify
+    waybar
+    lxqt.lxqt-policykit
+    kitty
+    steam
   ];
   
   fonts.packages = with pkgs; [
@@ -125,6 +134,15 @@
   ];
 
   programs.hyprland.enable = true;
+
+  # For gaming  
+  hardware.opengl.driSupport = true;
+  # For 32 bit applications
+  hardware.opengl.driSupport32Bit = true;
+  hardware.opengl.extraPackages = with pkgs; [
+    rocm-opencl-icd
+    rocm-opencl-runtime
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
