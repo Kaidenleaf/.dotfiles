@@ -56,7 +56,7 @@
 
   # Enable the KDE Plasma Desktop Environment.
   services.xserver.displayManager.sddm.enable = true;
-  services.xserver.desktopManager.plasma5.enable = true;
+  #services.xserver.desktopManager.plasma5.enable = true;
 
   # Configure keymap in X11
   services.xserver = {
@@ -96,18 +96,22 @@
     packages = with pkgs; [
       kate
     ];
+    useDefaultShell = true;
   };
+
+  programs.fish.enable = true;
+  users.defaultUserShell = pkgs.fish;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
   
   services.flatpak.enable = true;
+  programs.dconf.enable = true;
     
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #  wget
     lutris
     aseprite
     spotify
@@ -115,8 +119,6 @@
     prismlauncher
     vscode
     filezilla
-    rclone
-    google-chrome
     jdk17
     wofi
     xdg-desktop-portal-hyprland
@@ -126,10 +128,37 @@
     lxqt.lxqt-policykit
     kitty
     steam
+    libsForQt5.ark
+    xfce.thunar
+    xfce.thunar-volman
+    pavucontrol
+    swww
+    # Activate fhs environment
+    (let base = pkgs.appimageTools.defaultFhsEnvArgs; in
+      pkgs.buildFHSUserEnv (base // {
+      name = "fhs";
+      targetPkgs = pkgs: (
+        # pkgs.buildFHSUserEnv provides only a minimal FHS environment,
+        # lacking many basic packages needed by most software.
+        # Therefore, we need to add them manually.
+        #
+        # pkgs.appimageTools provides basic packages required by most software.
+        (base.targetPkgs pkgs) ++ [
+          pkg-config
+          ncurses
+          # Feel free to add more packages here if needed.
+        ]
+      );
+      profile = "export FHS=1";
+      runScript = "bash";
+      extraOutputsToInstall = ["dev"];
+    }))
   ];
   
   fonts.packages = with pkgs; [
     noto-fonts-cjk
+    noto-fonts
+    roboto
     (nerdfonts.override { fonts = [ "JetBrainsMono" ]; })
   ];
 

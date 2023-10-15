@@ -14,6 +14,27 @@
     pkgs.gh
   ];
 
+  gtk.enable = true;
+  gtk.cursorTheme.package = pkgs.bibata-cursors;
+  gtk.cursorTheme.name = "Bibata-Modern-Classic";
+  gtk.theme.package = pkgs.adw-gtk3;
+  gtk.theme.name = "adw-gtk3";
+  gtk.gtk4.extraConfig = {
+    gtk-application-prefer-dark-theme = true;
+    gtk-font-name="Noto Sans,  10";
+  };
+  gtk.gtk3.extraConfig = {
+    gtk-application-prefer-dark-theme = true;
+    gtk-font-name="Noto Sans,  10";
+  };
+  gtk.gtk2.extraConfig = "gtk-font-name=Noto Sans,  10";
+  
+
+  qt.enable = true;
+  qt.platformTheme = "gtk";
+  qt.style.name = "adwaita-dark";
+  qt.style.package = pkgs.adwaita-qt;
+ 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage
   # when a new Home Manager release introduces backwards
