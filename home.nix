@@ -14,11 +14,18 @@
     pkgs.gh
   ];
 
-  gtk.enable = true;
-  gtk.cursorTheme.package = pkgs.bibata-cursors;
-  gtk.cursorTheme.name = "Bibata-Modern-Classic";
-  gtk.theme.package = pkgs.adw-gtk3;
-  gtk.theme.name = "adw-gtk3";
+  gtk = {
+    enable = true;
+    cursorTheme.package = pkgs.bibata-cursors;
+    cursorTheme.name = "Bibata-Modern-Classic";
+    theme.package = pkgs.adw-gtk3;
+    theme.name = "adw-gtk3";
+    iconTheme = {
+      name = "Papirus-Dark";
+      package = pkgs.papirus-icon-theme;
+    };
+  };
+  
   gtk.gtk4.extraConfig = {
     gtk-application-prefer-dark-theme = true;
     gtk-font-name="Noto Sans,  10";

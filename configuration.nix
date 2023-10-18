@@ -3,6 +3,14 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
+let
+  # Change this to your username.
+  user = "beto";
+  # Change this to match your system's CPU.
+  platform = "amd";
+  # Change this to specify the IOMMU ids you wrote down earlier.
+  vfioIds = [ "1002:15d8" ];
+in
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -92,7 +100,7 @@
   users.users.beto = {
     isNormalUser = true;
     description = "Beto";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "qemu-libvirtd" "libvirtd" "disk" ];
     packages = with pkgs; [
       kate
     ];
@@ -106,12 +114,16 @@
   nixpkgs.config.allowUnfree = true;
   
   services.flatpak.enable = true;
-  programs.dconf.enable = true;
-    
+  
+  fonts.fontDir.enable = true;
+
+  services.gvfs.enable = true;
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    wget
     lutris
     aseprite
     spotify
@@ -128,11 +140,16 @@
     lxqt.lxqt-policykit
     kitty
     steam
-    libsForQt5.ark
-    xfce.thunar
-    xfce.thunar-volman
+    libsForQt5.ark    
     pavucontrol
     swww
+    slurp
+    grim
+    wl-clipboard
+    helix
+    virt-manager
+    blockbench-electron
+    blender
     # Activate fhs environment
     (let base = pkgs.appimageTools.defaultFhsEnvArgs; in
       pkgs.buildFHSUserEnv (base // {
@@ -164,6 +181,14 @@
 
   programs.hyprland.enable = true;
 
+  programs.thunar.enable = true;
+  programs.thunar.plugins = with pkgs.xfce; [
+    thunar-archive-plugin
+    thunar-volman
+  ];
+
+  programs.dconf.enable = true;
+
   # For gaming  
   hardware.opengl.driSupport = true;
   # For 32 bit applications
@@ -172,6 +197,39 @@
     rocm-opencl-icd
     rocm-opencl-runtime
   ];
+
+  #GPU PASS
+  # Configure kernel options to make sure IOMMU & KVM support is on.
+  boot = {
+    kernelModules = [ "kvm-${platform}" "vfio_virqfd" "vfio_pci" "vfio_iommu_type1" "vfio" ];
+    kernelParams = [ "${platform}_iommu=on" "${platform}_iommu=pt" "kvm.ignore_msrs=1" ];
+    extraModprobeConfig = "options vfio-pci ids=${builtins.concatStringsSep "," vfioIds}";
+  };
+
+  # Add a file for looking-glass to use later. This will allow for viewing the guest VM's screen in a
+  # performant way.
+  systemd.tmpfiles.rules = [
+      "f /dev/shm/looking-glass 0660 ${user} qemu-libvirtd -"
+  ];
+
+  # Enable virtualisation programs. These will be used by virt-manager to run your VM.
+  virtualisation = {
+    libvirtd = {
+      enable = true;
+      
+      # Don't start any VMs automatically on boot.
+      onBoot = "ignore";
+      # Stop all running VMs on shutdown.
+      onShutdown = "shutdown";
+
+      qemu = {
+        package = pkgs.qemu_kvm;
+        ovmf.enable = true;
+        swtpm.enable = true;
+        ovmf.packages = [ pkgs.OVMFFull.fd ];
+      };
+    };
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
